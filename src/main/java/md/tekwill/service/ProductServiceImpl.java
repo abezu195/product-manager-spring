@@ -1,52 +1,51 @@
 package md.tekwill.service;
 
 import md.tekwill.dao.ProductRepository;
-import md.tekwill.dao.ProductRepositoryJdbcTemplate;
-import md.tekwill.dao.ProductRepositoryJpa;
 import md.tekwill.entity.product.Drink;
 import md.tekwill.entity.product.Food;
 import md.tekwill.entity.product.FoodCategory;
 import md.tekwill.entity.product.Product;
+import md.tekwill.entity.product.Vendor;
 import md.tekwill.exceptions.ProductExistsException;
 import md.tekwill.exceptions.ProductNotFoundException;
 import md.tekwill.exceptions.ProductUpdateUnknownPropertyException;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductRepositoryJpa productRepositoryJpa;
+    private final VendorService vendorService;
 
-    public ProductServiceImpl(ProductRepository productRepository,
-                              ProductRepositoryJpa productRepositoryJpa) {
+    public ProductServiceImpl(ProductRepository productRepository, VendorService vendorService) {
         this.productRepository = productRepository;
-        this.productRepositoryJpa = productRepositoryJpa;
+        this.vendorService = vendorService;
     }
 
     @Override
-    public void create(String name, double price, LocalDate bestBefore, double volume) {
-        productRepository.save(new Drink(name, price, bestBefore, volume));
+    public void create(String name, double price, LocalDate bestBefore, double volume, long vendorId) {
+        Vendor vendor = vendorService.getById(vendorId);
+        productRepository.save(new Drink(name, price, bestBefore, volume, vendor));
     }
 
     @Override
-    public void create(String name, double price, LocalDate bestBefore, FoodCategory category) {
+    public void create(String name, double price, LocalDate bestBefore, FoodCategory category, long vendorId) {
         if (productRepository.findByName(name) != null) {
             throw new ProductExistsException("Product with name " + name + " already exists!");
         }
-        productRepositoryJpa.save(new Food(name, price, bestBefore, category));
+        Vendor vendor = vendorService.getById(vendorId);
+        productRepository.save(new Food(name, price, bestBefore, category, vendor));
     }
 
     @Override
     public List<Product> getAll() {
-        return productRepositoryJpa.findAll();
+        return productRepository.findAll();
     }
 
     @Override
@@ -75,18 +74,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getById(int id) {
-        Product product = productRepository.findById(id);
-        if (product == null) {
+//        Product product = productRepositoryJpa.findById(id)
+//               .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found!"));
+        // same as above
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (optionalProduct.isPresent()) {
+            return optionalProduct.get();
+        } else {
             throw new ProductNotFoundException("Product with id " + id + " not found!");
         }
-        return product;
     }
 
     @Override
     public void update(int id, double volume) throws ProductUpdateUnknownPropertyException {
         Product product = getById(id);
         if (product instanceof Drink) {
-            productRepository.update(id, volume);
+            ((Drink) product).setVolume(volume);
+            productRepository.save(product);
             return;
         }
         throw new ProductUpdateUnknownPropertyException("Product with id " + id + " is not drink!");
@@ -96,7 +100,8 @@ public class ProductServiceImpl implements ProductService {
     public void update(int id, FoodCategory category) throws ProductUpdateUnknownPropertyException {
         Product product = getById(id);
         if (product instanceof Food) {
-            productRepository.update(id, category);
+            ((Food) product).setCategory(category);
+            productRepository.save(product);
             return;
         }
         throw new ProductUpdateUnknownPropertyException("Product with id " + id + " is not food!");
@@ -104,16 +109,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(int id) {
-        productRepository.delete(id);
+        Product product = getById(id);
+        productRepository.delete(product);
     }
 
     @Override
     public List<Product> getByName(String name) {
-        return productRepositoryJpa.findAllByName(name);
+        return productRepository.findAllByName(name);
     }
 
     @Override
     public void save(Product product) {
-        productRepositoryJpa.save(product);
+        productRepository.save(product);
     }
 }

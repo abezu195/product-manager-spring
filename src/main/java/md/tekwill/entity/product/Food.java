@@ -23,8 +23,8 @@ public class Food extends Product {
         // used for ORM
     }
 
-    public Food(String name, double price, LocalDate bestBefore, FoodCategory category) {
-        super(name, price, bestBefore);
+    public Food(String name, double price, LocalDate bestBefore, FoodCategory category, Vendor vendor) {
+        super(name, price, bestBefore, vendor);
         this.category = category;
     }
 

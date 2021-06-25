@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,14 +20,16 @@ public class AdminProductController {
     }
 
     @PostMapping("/admin/food")
-    public ResponseEntity<Void> createFood(@RequestBody Food food) {
-        productService.save(food);
+    public ResponseEntity<Void> createFood(@RequestBody Food food,
+                                           @RequestParam("vendorId") Long vendorId) {
+        productService.create(food.getName(), food.getPrice(), food.getBestBefore(), food.getCategory(), vendorId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/admin/drink")
-    public ResponseEntity<Void> createDrink(@RequestBody Drink drink) {
-        productService.save(drink);
+    public ResponseEntity<Void> createDrink(@RequestBody Drink drink,
+                                            @RequestParam("vendorId") Long vendorId) {
+        productService.create(drink.getName(), drink.getPrice(), drink.getBestBefore(), drink.getVolume(), vendorId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

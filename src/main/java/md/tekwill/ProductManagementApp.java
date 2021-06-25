@@ -1,14 +1,5 @@
 package md.tekwill;
 
-import md.tekwill.app.ProductManagement;
-import md.tekwill.app.ProductManagementImpl;
-import md.tekwill.dao.InMemoryProductRepository;
-import md.tekwill.dao.ProductRepository;
-import md.tekwill.service.ProductService;
-import md.tekwill.service.ProductServiceImpl;
-
-import java.util.Scanner;
-
 public class ProductManagementApp {
 
     public static void main(String[] args) {

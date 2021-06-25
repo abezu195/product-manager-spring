@@ -19,8 +19,8 @@ public class Drink extends Product {
         // used by ORM
     }
 
-    public Drink(String name, double price, LocalDate bestBefore, double volume) {
-        super(name, price, bestBefore);
+    public Drink(String name, double price, LocalDate bestBefore, double volume, Vendor vendor) {
+        super(name, price, bestBefore, vendor);
         this.volume = volume;
     }
 

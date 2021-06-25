@@ -1,23 +1,17 @@
 package md.tekwill.dao;
 
-import md.tekwill.entity.product.FoodCategory;
 import md.tekwill.entity.product.Product;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ProductRepository {
-
-    void save(Product product);
-
-    List<Product> findAll();
-
-    Product findById(int id);
+@Repository
+public interface ProductRepository extends CrudRepository<Product, Integer> {
 
     Product findByName(String name);
 
-    void update(int id, double volume);
+    List<Product> findAllByName(String name);
 
-    void update(int id, FoodCategory category);
-
-    void delete(int id);
+    List<Product> findAll();
 }
